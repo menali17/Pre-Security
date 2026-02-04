@@ -205,8 +205,167 @@ To stop a process, we use the appropriately named `kill` command along with the 
 
 There are some of the signals that we can send to a process when it is killed:
 
-- SIGNTERM - Kill the process, but allow it to do some cleanup taks beforehand
+- SIGTERM - Kill the process, but allow it to do some cleanup taks beforehand
 - SIGKILL - Kill the process - doesn´tdo any cleanup after the fact
 - SIGSTOP - Stop/suspend a process
 
 ### How do Processes Start?
+
+The Operating System (OS) uses namespaces to ultimately split up the resources available on the computer to (such as CPU, RAM and priority) processes. Namespaces are great for security as it is a way of isolating processes from another, only those that are in the same namespace will be able to see each other.
+
+The process with an ID of **1** is the process that starts when the system boots. On Ubuntu systems, this process is usually **systemd**, which is responsible for managing services and processes. It acts as a bridge between the operating system and user-level programs.
+
+When the system finishes booting, `systemd` is one of the first processes to start. Any program or service that runs afterward typically starts as a **child process** of `systemd`.
+
+This means that while these programs run as independent processes, they are ultimately managed by `systemd`. This structure helps the system organize, monitor, and control running services more effectively.
+```
+PID USER   PR NI  VIRT   RES   SHR S  %CPU %MEM    TIME+ COMMAND
+1   root   20  0 101800 11340 8400 S   0.0  1.1   0:11.74 systemd
+```
+
+### Getting Processes/Services to Start on Boot
+
+Some applications can be configured to start automatically when the system boots. Examples include web servers, database servers, or file transfer servers. This software is often critical, so administrators set it to start during the system’s boot process.
+
+In this example, we’ll manually start the Apache web server and then configure the system to launch `apache2` automatically at boot.
+
+To do this, we use the `systemctl` command. This command allows us to interact with the `systemd` process (the system and service manager).
+
+The basic format of the command is: `systemctl [option] [service]`
+
+For example, to tell apache to start up, we'll use `systemctl start apache2`. Same with if we wanted to stop apache, we'd just replace the [option] with stop (instead of start like we provided).
+
+We can do five options with the `systemctl`:
+- Start
+- Stop
+- Enable
+- Disable
+- Status
+
+### An Introduction to Backgrounding and Foregrouding in Linux
+
+Processes can run in two states: **foreground** and **background**.
+
+Commands we normally run in the terminal, such as `echo`, run in the **foreground**. This means the terminal waits for the command to finish and shows the output directly to you.
+
+For example:
+```
+root@linux3:~# echo "Hello World"
+Hello World
+```
+Here, the command runs in the foreground, and we immediately see the output.
+
+If we add the `&` operator, the process runs in the **background**:
+
+```
+root@linux3:~# echo "Hello World" &
+[1] 16889
+root@linux3:~# Hello World
+```
+
+Instead of showing the output right away, the terminal returns a **job number** (`[1]`) and a **PID** (`16889`). This indicates that the process is now running in the background.
+
+Because it is running in the background, the terminal becomes available for new commands immediately, rather than waiting for the previous one to finish.
+
+Running processes in the background is especially useful for long-running tasks, such as copying large files. This allows us to continue using the terminal for other commands without having to wait for the file transfer to finish.
+
+We can achieve something similar when running scripts or commands interactively. Instead of starting them with the `&` operator, we can press **Ctrl + Z** on the keyboard to suspend (pause) the current process.
+
+When we press **Ctrl + Z**:
+
+- The process is stopped (paused)
+- It is moved into the background
+- The terminal becomes available for new commands
+
+This is an effective way to temporarily pause a script or command without terminating it.
+
+### Foregrounding a Processps
+
+Now that we have a process running in the background, for example, our script `background.sh`, which we can confirm using the `ps aux` command, we can bring this process back to the foreground to interact with it again.
+```
+root      19802  0.9  0.3   8616  3108 pts/1    T    15:37   0:01 /bin/bash ./background.sh
+root      20995  0.0  0.0      0     0 ?        I    15:40   0:00 [kworker/u30:1-events_unbound]
+ubuntu    21007  0.0  0.0   7228   592 ?        S    15:40   0:00 sleep 1
+root      21008  0.0  0.3  10616  3452 pts/1    R+   15:40   0:00 ps aux
+```
+
+After sending a process to the background using either **Ctrl + Z** or the `&` operator, we can use the `fg` command to bring it back to the foreground.
+
+When `fg` is used, the selected background job returns to the terminal, and we can see the script’s output and interact with it again as if it had never been paused.
+```
+root@linux3:/var/opt# fg
+```
+
+The `fg` command resumes the most recent background or stopped job and attaches it back to the current terminal session. If multiple jobs exist, a specific job can be resumed using its job number, for example:`fg %1`
+
+If no background or stopped jobs exist, the shell will return an error such as: `fg: no such job`
+
+## Maintaining Your System: Automation
+
+Users may want to schedule a certain action or task to take place after the system has booted. Take, for example, running commands, backing up files, or launching programs such as Spotify or Google Chrome.
+
+We're going to be talking about the cron process, but more specifically, how we can interact with it through the use of crontabs. Crontab is one of the processes that is started during boot and is responsible for facilitating and managing cron jobs.
+
+A crontab is simply a special file with formatting that is recognised by the cron process to execute each line step-by-step. Crontabs require 6 specific values:
+
+| Value | Description |
+|------|-------------|
+| MIN  | What minute to execute at |
+| HOUR | What hour to execute at |
+| DOM  | What day of the month to execute at |
+| MON  | What month of the year to execute at |
+| DOW  | What day of the week to execute at |
+| CMD  | The actual command that will be executed |
+
+Let's use the example of backing up files. You may wish to backup "cmnatic"'s  "Documents" every 12 hours. We would use the following formatting: 
+```
+0 */12 * * * cp -R /home/cmnatic/Documents /var/backups/
+```
+
+An interesting feature of crontabs is that these also support the wildcard or asterisk (*). If we do not wish to provide a value for that specific field, i.e. we don't care what month, day, or year it is executed., only that it is executed every 12 hours, we simply just place an asterisk.
+
+Crontabs can be edited by using `crontab -e`, where you can select an editor (such as Nano) to edit your crontab.
+
+
+## Maintaining Your System: Package Management
+
+### Introducing Packages & Software Repos
+
+When developers wish to submit software to the community, they will submit it to an  "apt" repository. If approved, their programs and tools will be released into the wild. Two of the most redeeming features of Linux shine to light here: User accessibility and the merit of open source tools.
+
+When using the `ls` command on a Ubuntu 20.04 Linux machine, these files serve as the gateway/registry. 
+
+```bash
+ubuntu@ip-10-10-29-121:/etc/apt$ ls
+apt.conf.d  auth.conf.d  preferences.d  sources.list  sources.list.d  trusted.gpg.d
+ubuntu@ip-10-10-29-121:/etc/apt$
+``` 
+
+Whilst Operating System vendors will maintain their own repositories, you can also add community repositories to your list. This allows you to extend the capabilities of your OS. Additional repositories can be added by using the `add-apt-repositorycommand` or by listing another provider. For example, some vendors will have a repository that is closer to their geographical location.
+
+### Managing Your Repositories (Adding and Removing)
+
+Normally we use the `apt` command to install software onto our Ubuntu system. The `apt` command is part of the package management software also named APT. APT contains a whole suite of tools that allows us to manage software packages and their sources, as well as install or remove software.
+
+While you can install software using package installers such as `dpkg`, the benefit of APT is that whenever we update our system, the repositories that contain the software we added are also checked for updates automatically.
+
+For example, we're can add the text editor **Sublime Text** to our Ubuntu machine as a repository, since it is not part of the default Ubuntu repositories. When adding software, the integrity of what we download is guaranteed through the use of **GPG (GNU Privacy Guard) keys**. These keys act as a safety check from the developers, essentially saying, *"this software is really from us."* If the keys do not match what your system trusts and what the developers used to sign the software, the download and installation will be blocked.
+
+
+## Maintaining Your System: Logs
+
+These files and folders contain logging information for applications and services running on your system. The Operating System  (OS) has become pretty good at automatically managing these logs in a process that is known as "rotating".
+
+These services and logs are a great way in monitoring the health of your system and protecting it. Not only that, but the logs for services such as a web server contain information about every single request - allowing developers or administrators to diagnose performance issues or investigate an intruder's activity. For example, the two types of log files below that are of interest:
+- Access log
+- Error log
+
+There are, of course, logs that store information about how the OS is running itself and actions that are performed by users, such as authentication attempts.
+
+```
+ubuntu@ip-172-31-23-158:/var/log/apache2$ ls
+access.log        access.log.3.gz   access.log.10.gz  access.log.11.gz  access.log.12.gz  access.log.13.gz  access.log.14.gz  access.log.2.gz  access.log.4.gz  access.log.5.gz  access.log.6.gz  access.log.7.gz  access.log.8.gz  access.log.9.gz
+error.log         error.log.1       error.log.10.gz   error.log.11.gz   error.log.12.gz   error.log.13.gz   error.log.14.gz   error.log.2.gz   error.log.3.gz   error.log.4.gz   error.log.5.gz   error.log.6.gz   error.log.7.gz   error.log.9.gz
+other_vhosts_access.log
+ubuntu@ip-172-31-23-158:/var/log/apache2$
+```
