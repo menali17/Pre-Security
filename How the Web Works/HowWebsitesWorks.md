@@ -49,7 +49,7 @@ The `<p>` element defines a paragraph.
 
 There are many other elements (tags) used for different purposes. For example, there are tags for buttons (`<button>`), images (`<img>`), lists, and much more.
 
-### Atributes
+### Attributes
 
 Tags can contain attributes, which provide additional information about an element. For example, the class attribute can be used to style an element (e.g., make the text a different color):
 
