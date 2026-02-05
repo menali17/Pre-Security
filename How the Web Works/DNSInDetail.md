@@ -1,8 +1,3 @@
-# DNS (Domain Name System)
-
-DNS provides a simple way for us to communicate with devices on internet without remembering complex numbers. Every computer on the internet has it own unique address to communicate with it called IP Address.
-
-When you want to visit a website, it's not exactly convenient to remember complicated set of numbers, and that's where DNS can help. So instead of remembering 104.26.10.229, for example, you can remember **website.com** instead.
 
 # DNS (Domain Name System)
 
