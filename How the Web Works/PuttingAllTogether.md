@@ -76,14 +76,28 @@ These changes are handled in what is called the **Backend**, using programming a
 
 Everything you see in your browser is part of the **Frontend**, while the logic, database queries, and processing happen in the **Backend**.
 
-## Fluxo de conexão
+## Connection Flow
 
-1. **DNS Resolve** → Descobre o IP do site  
-2. **Connection** → Navegador abre conexão com o servidor  
-3. **Security Layers** → Passa por CDN, WAF e Load Balancer  
-4. **Web Server** → Recebe requisição HTTP  
-5. **Backend** → Processa lógica do site  
-6. **Database** → Busca ou salva dados  
-7. **Response** → HTML volta para o navegador  
-8. **Frontend** → Página aparece para o usuário
 
+DNS Resolution - Discovers the website’s IP address
+
+
+Connection - The browser opens a connection to the server
+
+
+Security Layers - Traffic passes through CDN, WAF, and Load Balancer
+
+
+Web Server - Receives the HTTP request
+
+
+Backend - Processes the application logic
+
+
+Database - Retrieves or stores data
+
+
+Response - HTML is sent back to the browser
+
+
+Frontend - The page is rendered for the user
