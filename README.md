@@ -37,9 +37,6 @@ It focuses on understanding how systems and networks operate at a fundamental le
 
 
 ## Practical Focus
-
-This repository includes:
-
 - Structured notes
 - Command explanations
 - Security-focused observations
