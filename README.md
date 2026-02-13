@@ -44,9 +44,8 @@ It focuses on understanding how systems and networks operate at a fundamental le
 
 ## Why I´m Studying This?
 
-Effective cybersecurity requires a deep understanding of:
+Effective cybersecurity requires a deep understanding of how operating systems manage processes and memory, how network communication flow, how services interact with the system and how logging and monitoring work
 
-- How operating systems manage processes and memory
-- How network communication flows
-- How services interact with the system
-- How logging and monitoring work
+
+The content documented here is based on my completion of the Pre-Security learning path on TryHackMe.
+Platform: https://tryhackme.com
